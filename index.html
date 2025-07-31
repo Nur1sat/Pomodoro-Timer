@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Simple Timer</title>
+    <style>
+        /* Make the page look nice and big */
+        body {
+            font-family: Arial, sans-serif; /* Use easy to read letters */
+            text-align: center; /* Put everything in the middle */
+            background-color: #f0f8ff; /* Light blue color */
+            margin: 0; /* No extra space around the page */
+            padding: 20px; /* Add some space inside */
+        }
+
+        /* Make the main box pretty */
+        .timer-box {
+            background-color: white; /* White background */
+            border-radius: 20px; /* Round corners */
+            padding: 40px; /* Space inside the box */
+            max-width: 400px; /* Not too wide */
+            margin: 0 auto; /* Center the box */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Small shadow */
+        }
+
+        /* Make the title big and colorful */
+        h1 {
+            color: #ff6b6b; /* Red color */
+            font-size: 2.5em; /* Very big text */
+            margin-bottom: 20px; /* Space below */
+        }
+
+        /* Make the time numbers very big */
+        .time-display {
+            font-size: 4em; /* Super big numbers */
+            font-weight: bold; /* Make letters thick */
+            color: #4ecdc4; /* Blue-green color */
+            margin: 20px 0; /* Space above and below */
+        }
+
+        /* Make buttons look nice and big */
+        button {
+            font-size: 1.2em; /* Big text on buttons */
+            padding: 15px 30px; /* Make buttons bigger */
+            margin: 10px; /* Space between buttons */
+            border: none; /* No ugly border */
+            border-radius: 25px; /* Round button corners */
+            cursor: pointer; /* Show hand when mouse over */
+            font-weight: bold; /* Thick letters */
+        }
+
+        /* Start button is green */
+        .start-btn {
+            background-color: #4CAF50; /* Green color */
+            color: white; /* White letters */
+        }
+
+        /* Stop button is red */
+        .stop-btn {
+            background-color: #f44336; /* Red color */
+            color: white; /* White letters */
+        }
+
+        /* Reset button is blue */
+        .reset-btn {
+            background-color: #2196F3; /* Blue color */
+            color: white; /* White letters */
+        }
+
+        /* Make buttons change color when you click them */
+        button:hover {
+            opacity: 0.8; /* Make a little transparent */
+        }
+
+        /* Show what we are doing now */
+        .status {
+            font-size: 1.5em; /* Big text */
+            margin: 20px 0; /* Space around */
+            font-weight: bold; /* Thick letters */
+            color: #333; /* Dark gray */
+        }
+    </style>
+</head>
+<body>
+    <!-- This is our timer app -->
+    <div class="timer-box">
+        <!-- Big title at the top -->
+        <h1>🍅 My Timer</h1>
+        
+        <!-- Show if we are working or resting -->
+        <div class="status" id="status">Ready to Work!</div>
+        
+        <!-- Show the time left -->
+        <div class="time-display" id="timeDisplay">25:00</div>
+        
+        <!-- Buttons to control the timer -->
+        <button class="start-btn" id="startBtn">▶️ Start</button>
+        <button class="stop-btn" id="stopBtn">⏸️ Stop</button>
+        <button class="reset-btn" id="resetBtn">🔄 Reset</button>
+    </div>
+
+    <script>
+        // This is JavaScript written with TypeScript thinking!
+        // (JavaScript that follows TypeScript rules but browsers can understand)
+        
+        // These are our timer settings (like rules for a game)
+        // TYPE: number - means this holds counting numbers
+        var workTime = 25 * 60; // 25 minutes for work (in seconds)
+        var breakTime = 5 * 60; // 5 minutes for break (in seconds)
+        
+        // These remember what is happening right now
+        // TYPE: number - how much time is left
+        var timeLeft = workTime;
+        // TYPE: boolean - true means yes, false means no
+        var isRunning = false; // Is the timer going?
+        var isWorkTime = true; // Are we working or resting?
+        // TYPE: number or undefined - holds our timer or nothing
+        var timerInterval;
+        
+        // Get the parts of our webpage we want to change
+        // TYPE: HTMLElement or null - webpage parts that might exist or not
+        var timeDisplay = document.getElementById('timeDisplay');
+        var statusDisplay = document.getElementById('status');
+        var startBtn = document.getElementById('startBtn');
+        var stopBtn = document.getElementById('stopBtn');
+        var resetBtn = document.getElementById('resetBtn');
+        
+        // Function to start our timer (like pressing play)
+        // RETURNS: void (nothing) - just does something, doesn't give back data
+        function startTimer() {
+            // Only start if not already running
+            if (!isRunning) {
+                isRunning = true; // Now we are running!
+                
+                // This runs every second (1000 milliseconds = 1 second)
+                timerInterval = setInterval(function() {
+                    timeLeft = timeLeft - 1; // Take away 1 second
+                    updateDisplay(); // Show the new time
+                    
+                    // Check if time is finished
+                    if (timeLeft <= 0) {
+                        finishTimer(); // Do what happens when timer ends
+                    }
+                }, 1000); // Run this every 1000 milliseconds (1 second)
+            }
+        }
+        
+        // Function to stop our timer (like pressing pause)
+        // RETURNS: void (nothing)
+        function stopTimer() {
+            isRunning = false; // We are not running anymore
+            // TypeScript-style safety: check if timerInterval exists
+            if (timerInterval) {
+                clearInterval(timerInterval); // Stop the counting
+            }
+        }
+        
+        // Function to reset our timer (start over)
+        // RETURNS: void (nothing)
+        function resetTimer() {
+            stopTimer(); // First stop the timer
+            isWorkTime = true; // Start with work time
+            timeLeft = workTime; // Set time back to 25 minutes
+            // TypeScript-style safety: check if statusDisplay exists
+            if (statusDisplay) {
+                statusDisplay.textContent = 'Ready to Work!'; // Show ready message
+            }
+            updateDisplay(); // Update what we see on screen
+        }
+        
+        // Function to update what we see on the screen
+        // RETURNS: void (nothing)
+        function updateDisplay() {
+            // Turn seconds into minutes and seconds
+            // TYPE: number - how many whole minutes
+            var minutes = Math.floor(timeLeft / 60);
+            // TYPE: number (will become string) - how many seconds left over
+            var seconds = timeLeft % 60;
+            
+            // Make sure we always show 2 numbers (like 05 instead of 5)
+            if (seconds < 10) {
+                seconds = '0' + seconds; // Add zero in front - now TYPE: string
+            }
+            if (minutes < 10) {
+                minutes = '0' + minutes; // Add zero in front - now TYPE: string
+            }
+            
+            // TypeScript-style safety: check if timeDisplay exists
+            if (timeDisplay) {
+                timeDisplay.textContent = minutes + ':' + seconds;
+            }
+        }
+        
+        // Function for what happens when timer finishes
+        // RETURNS: void (nothing)
+        function finishTimer() {
+            stopTimer(); // Stop the timer
+            
+            // Switch between work and break
+            if (isWorkTime) {
+                // We were working, now time for break!
+                isWorkTime = false; // Now it's break time
+                timeLeft = breakTime; // Set to 5 minutes
+                // TypeScript-style safety: check if statusDisplay exists
+                if (statusDisplay) {
+                    statusDisplay.textContent = '🎉 Break Time!'; // Show break message
+                }
+                alert('Good job! Time for a break! 🎉'); // Pop-up message
+            } else {
+                // We were on break, now back to work!
+                isWorkTime = true; // Now it's work time
+                timeLeft = workTime; // Set to 25 minutes
+                // TypeScript-style safety: check if statusDisplay exists
+                if (statusDisplay) {
+                    statusDisplay.textContent = '💪 Work Time!'; // Show work message
+                }
+                alert('Break over! Time to work! 💪'); // Pop-up message
+            }
+            
+            updateDisplay(); // Show the new time
+        }
+        
+        // Wait for page to load completely, then set up everything
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update the display when page first loads
+            updateDisplay();
+            
+            // Add click events to buttons (TypeScript-style safety checks)
+            if (startBtn) {
+                startBtn.addEventListener('click', startTimer);
+            }
+            if (stopBtn) {
+                stopBtn.addEventListener('click', stopTimer);
+            }
+            if (resetBtn) {
+                resetBtn.addEventListener('click', resetTimer);
+            }
+        });
+    </script>
+</body>
+</html>
